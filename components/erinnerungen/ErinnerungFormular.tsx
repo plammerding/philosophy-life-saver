@@ -17,9 +17,13 @@ const kategorieOptionen: { value: ErinnerungsKategorie; label: string }[] = [
 ];
 
 const typOptionen: { value: ErinnerungsTyp; label: string }[] = [
-  { value: 'jaehrlich', label: 'Jährlich' },
-  { value: 'monatlich', label: 'Monatlich' },
-  { value: 'einmalig', label: 'Einmalig' },
+  { value: 'monatlich',        label: 'Monatlich' },
+  { value: 'zweimonatlich',    label: 'Alle 2 Monate' },
+  { value: 'vierteljaehrlich', label: 'Vierteljährlich' },
+  { value: 'halbjaehrlich',    label: 'Halbjährlich (6 Mon.)' },
+  { value: 'jaehrlich',        label: 'Jährlich' },
+  { value: 'zweijaehrlich',    label: 'Alle 2 Jahre' },
+  { value: 'einmalig',         label: 'Einmalig' },
 ];
 
 export default function ErinnerungFormular({ onHinzufuegen }: Props) {
@@ -73,11 +77,7 @@ export default function ErinnerungFormular({ onHinzufuegen }: Props) {
     >
       <div className="flex items-center justify-between">
         <p className="font-semibold text-slate-700">Neue Erinnerung</p>
-        <button
-          type="button"
-          onClick={() => setOffen(false)}
-          className="text-slate-400 hover:text-slate-600 p-1"
-        >
+        <button type="button" onClick={() => setOffen(false)} className="text-slate-400 hover:text-slate-600 p-1">
           <X size={18} />
         </button>
       </div>
@@ -110,9 +110,7 @@ export default function ErinnerungFormular({ onHinzufuegen }: Props) {
             className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-slate-800 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 bg-white"
           >
             {typOptionen.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
         </div>
@@ -138,9 +136,7 @@ export default function ErinnerungFormular({ onHinzufuegen }: Props) {
             className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-slate-800 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 bg-white"
           >
             {kategorieOptionen.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
         </div>
@@ -154,10 +150,7 @@ export default function ErinnerungFormular({ onHinzufuegen }: Props) {
         className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
       />
 
-      <button
-        type="submit"
-        className="w-full bg-indigo-600 text-white py-2.5 rounded-xl font-semibold hover:bg-indigo-700 transition-colors"
-      >
+      <button type="submit" className="w-full bg-indigo-600 text-white py-2.5 rounded-xl font-semibold hover:bg-indigo-700 transition-colors">
         Hinzufügen
       </button>
     </form>

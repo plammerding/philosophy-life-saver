@@ -2,13 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Home, Bell } from 'lucide-react';
+import { LayoutDashboard, Home, Bell, Bot } from 'lucide-react';
 import clsx from 'clsx';
 
 const links = [
-  { href: '/', label: 'Heute', icon: LayoutDashboard },
-  { href: '/haushalt', label: 'Haushalt', icon: Home },
-  { href: '/erinnerungen', label: 'Erinnerungen', icon: Bell },
+  { href: '/',            label: 'Heute',        icon: LayoutDashboard },
+  { href: '/haushalt',    label: 'Haushalt',     icon: Home },
+  { href: '/erinnerungen',label: 'Erinnern',     icon: Bell },
+  { href: '/assistent',   label: 'Assistent',    icon: Bot },
 ];
 
 export default function Navigation() {
@@ -25,15 +26,10 @@ export default function Navigation() {
               href={href}
               className={clsx(
                 'flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-colors',
-                aktiv
-                  ? 'text-indigo-600'
-                  : 'text-slate-400 hover:text-slate-600'
+                aktiv ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'
               )}
             >
-              <Icon
-                size={22}
-                strokeWidth={aktiv ? 2.5 : 1.8}
-              />
+              <Icon size={22} strokeWidth={aktiv ? 2.5 : 1.8} />
               {label}
             </Link>
           );

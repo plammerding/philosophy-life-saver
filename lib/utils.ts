@@ -56,10 +56,16 @@ export function getTageBisErinnerung(erinnerung: Erinnerung): number {
 
 export function naechstesFaelligkeitsDatum(
   typ: Erinnerung['typ'],
-  letztesDatum?: string
+  basisDatum?: string
 ): string {
-  const basis = letztesDatum ? parseISO(letztesDatum) : new Date();
-  if (typ === 'jaehrlich') return format(addYears(basis, 1), 'yyyy-MM-dd');
-  if (typ === 'monatlich') return format(addMonths(basis, 1), 'yyyy-MM-dd');
-  return format(basis, 'yyyy-MM-dd');
+  const basis = basisDatum ? parseISO(basisDatum) : new Date();
+  switch (typ) {
+    case 'monatlich':        return format(addMonths(basis, 1), 'yyyy-MM-dd');
+    case 'zweimonatlich':    return format(addMonths(basis, 2), 'yyyy-MM-dd');
+    case 'vierteljaehrlich': return format(addMonths(basis, 3), 'yyyy-MM-dd');
+    case 'halbjaehrlich':    return format(addMonths(basis, 6), 'yyyy-MM-dd');
+    case 'jaehrlich':        return format(addYears(basis, 1), 'yyyy-MM-dd');
+    case 'zweijaehrlich':    return format(addYears(basis, 2), 'yyyy-MM-dd');
+    default:                 return format(basis, 'yyyy-MM-dd');
+  }
 }
