@@ -1,65 +1,166 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { format } from 'date-fns';
+import { de } from 'date-fns/locale';
+import { AlertCircle, ChevronRight, CheckCircle2, Clock } from 'lucide-react';
+import clsx from 'clsx';
+import { getHaushaltsAufgaben, getErinnerungen } from '@/lib/storage';
+import { getAmpelHaushalt, getAmpelErinnerung, getTageBisErinnerung } from '@/lib/utils';
+import type { HaushaltsAufgabe, Erinnerung } from '@/lib/types';
+
+export default function Dashboard() {
+  const [aufgaben, setAufgaben] = useState<HaushaltsAufgabe[]>([]);
+  const [erinnerungen, setErinnerungen] = useState<Erinnerung[]>([]);
+  const [geladen, setGeladen] = useState(false);
+
+  useEffect(() => {
+    setAufgaben(getHaushaltsAufgaben());
+    setErinnerungen(getErinnerungen());
+    setGeladen(true);
+  }, []);
+
+  const kritischeAufgaben = aufgaben.filter(
+    (a) => getAmpelHaushalt(a) === 'rot' || getAmpelHaushalt(a) === 'gelb'
+  );
+
+  const kritischeErinnerungen = erinnerungen.filter(
+    (e) => getAmpelErinnerung(e) === 'rot' || getAmpelErinnerung(e) === 'gelb'
+  );
+
+  const allesOk = kritischeAufgaben.length === 0 && kritischeErinnerungen.length === 0;
+  const heute = format(new Date(), 'EEEE, d. MMMM', { locale: de });
+
+  if (!geladen) return null;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <p className="text-sm text-slate-400 font-medium capitalize">{heute}</p>
+        <h1 className="text-2xl font-bold text-slate-800 mt-1">Hey Philipp 👋</h1>
+      </div>
+
+      {/* Status-Banner */}
+      {allesOk ? (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center gap-3">
+          <CheckCircle2 className="text-emerald-500 shrink-0" size={24} />
+          <div>
+            <p className="font-semibold text-emerald-800">Alles im grünen Bereich!</p>
+            <p className="text-sm text-emerald-600">Nichts dringend — gute Arbeit.</p>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      ) : (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center gap-3">
+          <AlertCircle className="text-amber-500 shrink-0" size={24} />
+          <div>
+            <p className="font-semibold text-amber-800">
+              {kritischeAufgaben.length + kritischeErinnerungen.length} Dinge brauchen Aufmerksamkeit
+            </p>
+            <p className="text-sm text-amber-600">Schau dir die Liste unten an.</p>
+          </div>
         </div>
-      </main>
+      )}
+
+      {/* Dringende Haushalt-Aufgaben */}
+      {kritischeAufgaben.length > 0 && (
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold text-slate-700">Haushalt</h2>
+            <Link
+              href="/haushalt"
+              className="text-sm text-indigo-600 flex items-center gap-0.5 hover:text-indigo-800"
+            >
+              Alle <ChevronRight size={14} />
+            </Link>
+          </div>
+          <div className="space-y-2">
+            {kritischeAufgaben.map((aufgabe) => {
+              const status = getAmpelHaushalt(aufgabe);
+              return (
+                <div
+                  key={aufgabe.id}
+                  className={clsx(
+                    'flex items-center gap-3 rounded-xl px-4 py-3 border',
+                    status === 'rot' ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'
+                  )}
+                >
+                  <div
+                    className={clsx(
+                      'w-2.5 h-2.5 rounded-full shrink-0',
+                      status === 'rot' ? 'bg-red-500' : 'bg-amber-400'
+                    )}
+                  />
+                  <span className="font-medium text-slate-700 flex-1">{aufgabe.name}</span>
+                  <span className={clsx('text-xs font-medium', status === 'rot' ? 'text-red-600' : 'text-amber-600')}>
+                    {aufgabe.letzteErledigung ? 'Überfällig' : 'Noch nie'}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Dringende Erinnerungen */}
+      {kritischeErinnerungen.length > 0 && (
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold text-slate-700">Erinnerungen</h2>
+            <Link
+              href="/erinnerungen"
+              className="text-sm text-indigo-600 flex items-center gap-0.5 hover:text-indigo-800"
+            >
+              Alle <ChevronRight size={14} />
+            </Link>
+          </div>
+          <div className="space-y-2">
+            {kritischeErinnerungen.map((erinnerung) => {
+              const status = getAmpelErinnerung(erinnerung);
+              const tage = getTageBisErinnerung(erinnerung);
+              return (
+                <div
+                  key={erinnerung.id}
+                  className={clsx(
+                    'flex items-center gap-3 rounded-xl px-4 py-3 border',
+                    status === 'rot' ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'
+                  )}
+                >
+                  <Clock
+                    size={16}
+                    className={clsx('shrink-0', status === 'rot' ? 'text-red-500' : 'text-amber-500')}
+                  />
+                  <span className="font-medium text-slate-700 flex-1">{erinnerung.name}</span>
+                  <span className={clsx('text-xs font-medium', status === 'rot' ? 'text-red-600' : 'text-amber-600')}>
+                    {tage < 0 ? `${Math.abs(tage)}d überfällig` : `in ${tage}d`}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Quick Links */}
+      {allesOk && (
+        <div className="grid grid-cols-2 gap-3">
+          <Link
+            href="/haushalt"
+            className="bg-white border border-slate-200 rounded-2xl p-4 hover:border-indigo-300 transition-colors"
+          >
+            <p className="font-semibold text-slate-700">🏠 Haushalt</p>
+            <p className="text-sm text-slate-400 mt-1">{aufgaben.length} Aufgaben</p>
+          </Link>
+          <Link
+            href="/erinnerungen"
+            className="bg-white border border-slate-200 rounded-2xl p-4 hover:border-indigo-300 transition-colors"
+          >
+            <p className="font-semibold text-slate-700">🔔 Erinnerungen</p>
+            <p className="text-sm text-slate-400 mt-1">{erinnerungen.length} eingetragen</p>
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
